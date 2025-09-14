@@ -25,5 +25,5 @@ nav:
 theme:
   name: material
   highlightjs: true
-  logo: 'assets/fsharp128.png'
-  favicon: 'images/fsharp128.png'
+  logo: 'fsharp128.png'
+  favicon: 'fsharp128.png'
