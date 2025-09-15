@@ -29,5 +29,5 @@ jobs:
         run: pip install mkdocs-material
 
       - name: Deploy to GitHub Pages
-        run: cd deployment && dotnet fsi build.fsx && cd mkdocs && mkdocs gh-deploy --force
+        run: cd deployment && dotnet --version && dotnet fsi build.fsx && cd mkdocs && mkdocs gh-deploy --force
 
