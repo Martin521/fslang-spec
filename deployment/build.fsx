@@ -159,7 +159,7 @@ let adjustLinks state line =
                 if a = (chapterFileName, anchor) then Some (sectionText s) else None) state.toc with
             | Some sText ->
                 let post', state' = adjustLinks' state post  // recursive check for multiple links in a line
-                let adjustedLine = $"{pre}[§{sText}]({chapterFileName}#{sText}-{anchor}){post'}"
+                let adjustedLine = $"{pre}[§{sText}]({chapterFileName}#{kebabCase sText}-{anchor}){post'}"
                 adjustedLine, state'
             | None ->
                 let msg = $"unknown link target {anchor}"
