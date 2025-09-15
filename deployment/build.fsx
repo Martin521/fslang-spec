@@ -56,7 +56,7 @@ let readSources () =
         let getChapter name = {name = name; lines = File.ReadAllLines($"{sourceDir}/{name}.md") |> Array.toList}
         let clauses = catalog.MainBody |> List.map getChapter
         let frontMatter = getChapter catalog.FrontMatter
-        let rfcStatus = getChapter "rfc-status.md"
+        let rfcStatus = getChapter "rfc-status"
         let totalChapters = clauses.Length + 1
         let totalLines = List.sumBy (_.lines >> List.length) clauses + frontMatter.lines.Length
         printfn $"read {totalChapters} files with a total of {totalLines} lines"
