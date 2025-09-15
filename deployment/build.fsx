@@ -1,22 +1,28 @@
-// This script creates the full spec doc with freshly numbered section headers, adjusted reference links and ToC.
-// Note that the reference links do work on github and in VS Code, but not with all other markdown dialects. For
-// releases (which will probably be html or pdf), a conversion tool must be used that preserves the links, or else
-// this build script must be updated to add proper name tags to the headings.
-
-// Configuration of file locations and some document elements
-let sourceDir = "spec"
-let outDir = "artifacts"
-let catalogPath = $"{sourceDir}/Catalog.json"
-let fullDocName = "spec"
-let outChapterDir = $"{outDir}/chapters"
-
-let versionPlaceholder () = [$"_This version was created from sources on {System.DateTime.Now}_"; ""]
-let tocHeader = [""; "# Table of Contents"]
+// This script adds section headers and adjusts reference links.
+// It creates a single markdown doc (including ToC) of the spec and the necessary
+// input for mkdocs in the artifacts directory.
 
 open System
 open System.Text.RegularExpressions
 open System.Text.Json
 open System.IO
+
+// Configuration of file locations and some document elements
+let sourceDir = Path.Join("..", "spec")
+let outDir = Path.Join("..", "artifacts")
+let catalogPath = Path.Join(sourceDir,"Catalog.json")
+let fullDocName = "spec"
+let fullDocPath = Path.Join(outDir,$"{fullDocName}.md")
+let mkdocsDir = Path.Join(outDir, "mkdocs")
+let mkdocsDocsDir = Path.Join(mkdocsDir, "docs")
+let assetsDir = "assets"
+let mkdocsConfigFilePath = Path.Join(mkdocsDir, "mkdocs.yml")
+let mkdocsIconFilePath = Path.Join(mkdocsDocsDir, "fsharp128.png")
+let mkdocsConfigSourcePath = Path.Join(assetsDir, "mkdocs.yml")
+let mkdocsIconSourcePath = Path.Join(assetsDir, "fsharp128.png")
+
+let versionPlaceholder () = [""; $"_This version was created from sources on {System.DateTime.Now}_"; ""]
+let tocHeader = [""; "# Table of Contents"]
 
 type Chapter = {name: string; lines: string list}
 type Sources = {frontMatter: Chapter; clauses: Chapter list}
@@ -59,17 +65,19 @@ let readSources () =
 
 let writeArtifacts (fullDoc, chapters) =
     try
-        if not <| Directory.Exists outDir then
-            Directory.CreateDirectory outDir |> ignore
-        let fullDocPath = $"{outDir}/{fullDocName}.md"
+        Directory.CreateDirectory outDir |> ignore
+        Directory.CreateDirectory mkdocsDir |> ignore
+        Directory.CreateDirectory mkdocsDocsDir |> ignore
+        File.Delete mkdocsConfigFilePath
+        File.Delete mkdocsIconFilePath
+        File.Copy(mkdocsConfigSourcePath, mkdocsConfigFilePath)
+        File.Copy(mkdocsIconSourcePath, mkdocsIconFilePath)
         File.WriteAllLines(fullDocPath, fullDoc.lines)
         printfn $"created {fullDocPath}"
-        if not <| Directory.Exists outChapterDir then
-            Directory.CreateDirectory outChapterDir |> ignore
         for chapter in chapters do
-            let chapterPath = $"{outChapterDir}/{chapter.name}.md"
+            let chapterPath = Path.Join(mkdocsDocsDir, $"{chapter.name}.md")
             File.WriteAllLines(chapterPath, chapter.lines)
-        printfn $"created {List.length chapters} chapters in {outChapterDir}"
+        printfn $"created {List.length chapters} chapters in {mkdocsDocsDir}"
         Ok()
     with e ->
         Error(IoFailure e.Message)

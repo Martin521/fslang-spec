@@ -1,4 +1,4 @@
-name: Deploy MkDocs to GitHub Pages
+name: Deploy the spec through mkdocs to GitHub Pages
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - dev
 
 permissions:
-  contents: write  # needed to push to gh-pages branch
+  contents: write
 
 jobs:
   deploy:
@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,5 +29,5 @@ jobs:
         run: pip install mkdocs-material
 
       - name: Deploy to GitHub Pages
-        run: cd mkdocs && mkdocs gh-deploy --force
+        run: cd deployment && dotnet fsi build.fsx && cd mkdocs && mkdocs gh-deploy --force
 
