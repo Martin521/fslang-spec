@@ -68,10 +68,11 @@ let writeArtifacts chapters =
         Directory.CreateDirectory outDir |> ignore
         Directory.CreateDirectory mkdocsDir |> ignore
         Directory.CreateDirectory mkdocsDocsDir |> ignore
-        File.Delete mkdocsConfigFilePath
         File.Delete mkdocsIconFilePath
-        File.Copy(mkdocsConfigSourcePath, mkdocsConfigFilePath)
         File.Copy(mkdocsIconSourcePath, mkdocsIconFilePath)
+        let configLines = File.ReadAllLines mkdocsConfigSourcePath |> Array.toList
+        let navLines = chapters |> List.map (fun c -> $"- {chapterFileName c.name}")
+        File.WriteAllLines(mkdocsConfigFilePath, configLines @ navLines)
         for chapter in chapters do
             let chapterPath = Path.Join(mkdocsDocsDir, chapterFileName chapter.name)
             File.WriteAllLines(chapterPath, chapter.lines)
