@@ -23,7 +23,7 @@ let versionPlaceholder () = [""; $"_This version was created from sources on {Sy
 let tocHeader = [""; "# Table of Contents"]
 
 type Chapter = {name: string; lines: string list}
-type Sources = {frontMatter: Chapter; clauses: Chapter list}
+type Sources = {frontMatter: Chapter; rfcStatus: Chapter; clauses: Chapter list}
 type Catalog = {FrontMatter: string; MainBody: string list; Annexes: string list}
 type FilenameHandling = KeepFilename | DiscardFilename
 type BuildState = {
@@ -56,10 +56,11 @@ let readSources () =
         let getChapter name = {name = name; lines = File.ReadAllLines($"{sourceDir}/{name}.md") |> Array.toList}
         let clauses = catalog.MainBody |> List.map getChapter
         let frontMatter = getChapter catalog.FrontMatter
+        let rfcStatus = getChapter "rfc-status.md"
         let totalChapters = clauses.Length + 1
         let totalLines = List.sumBy (_.lines >> List.length) clauses + frontMatter.lines.Length
         printfn $"read {totalChapters} files with a total of {totalLines} lines"
-        Ok {frontMatter = frontMatter; clauses = clauses}
+        Ok {frontMatter = frontMatter; rfcStatus = rfcStatus; clauses = clauses}
     with e ->
         Error(IoFailure e.Message)
 
@@ -178,7 +179,7 @@ let processSources chapters =
         {name = chapter.name; lines = adjustedLines}
     let frontMatterLines = chapters.frontMatter.lines @ versionPlaceholder()
     let adjustedChapters = processedChapters |> List.map adjustChapterLinks
-    let outputChapters = {name = "index"; lines = frontMatterLines} :: adjustedChapters
+    let outputChapters = {name = "index"; lines = frontMatterLines} :: chapters.rfcStatus :: adjustedChapters
     if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok outputChapters
 
 let build () =
