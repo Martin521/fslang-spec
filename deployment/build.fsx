@@ -9,10 +9,8 @@ open System.IO
 
 // Configuration of file locations and some document elements
 let sourceDir = Path.Join("..", "spec")
-let outDir = Path.Join("..", "artifacts")
 let catalogPath = Path.Join(sourceDir,"Catalog.json")
-let fullDocName = "spec"
-let fullDocPath = Path.Join(outDir,$"{fullDocName}.md")
+let outDir = Path.Join("..", "artifacts")
 let mkdocsDir = Path.Join(outDir, "mkdocs")
 let mkdocsDocsDir = Path.Join(mkdocsDir, "docs")
 let assetsDir = "assets"
@@ -63,7 +61,7 @@ let readSources () =
     with e ->
         Error(IoFailure e.Message)
 
-let writeArtifacts (fullDoc, chapters) =
+let writeArtifacts chapters =
     try
         Directory.CreateDirectory outDir |> ignore
         Directory.CreateDirectory mkdocsDir |> ignore
@@ -72,8 +70,6 @@ let writeArtifacts (fullDoc, chapters) =
         File.Delete mkdocsIconFilePath
         File.Copy(mkdocsConfigSourcePath, mkdocsConfigFilePath)
         File.Copy(mkdocsIconSourcePath, mkdocsIconFilePath)
-        File.WriteAllLines(fullDocPath, fullDoc.lines)
-        printfn $"created {fullDocPath}"
         for chapter in chapters do
             let chapterPath = Path.Join(mkdocsDocsDir, $"{chapter.name}.md")
             File.WriteAllLines(chapterPath, chapter.lines)
@@ -121,7 +117,7 @@ let checkCodeBlock state line =
         else
             {state with inCodeBlock = true}
 
-let renumberIfHeaderLine state line =
+let preprocessLine state line =
     let state = {state with lineNumber = state.lineNumber + 1}
     let state = checkCodeBlock state line
     let m = Regex.Match(line, "^(#+) +(.*)")
@@ -144,19 +140,12 @@ let renumberIfHeaderLine state line =
                 let headerLine = $"{headerPrefix} {sectionText sectionNumber} {heading}"
                 headerLine, {state with sectionNumber = sectionNumber; toc = state.toc.Add(sectionNumber, heading)}
 
-let renumberClause state clause =
-    let state = {state with chapterName = clause.name; lineNumber = 0}
-    let outLines, state = (state, clause.lines) ||> List.mapFold renumberIfHeaderLine
-    {clause with lines = outLines}, state
+let preprocessChapter state chapter =
+    let state = {state with chapterName = chapter.name; lineNumber = 0}
+    let outLines, state = (state, chapter.lines) ||> List.mapFold preprocessLine
+    {chapter with lines = outLines}, state
 
-let tocLines toc =
-    let tocLine (number, heading) =
-        let sText = sectionText number
-        let anchor = $"#{kebabCase sText}-{kebabCase heading}"
-        String.replicate (number.Length - 1) "  " + $"- [{sText} {heading}]({anchor})"
-    toc |> Map.toList |> List.map tocLine
-
-let adjustLinks fileNameHandling state line =
+let adjustLinks state line =
     let state = {state with lineNumber = state.lineNumber + 1}
     let rec adjustLinks' state lineFragment =
         let m = Regex.Match(lineFragment, "(.*)\[§(\d+\.[\.\d]*)\]\(([^#)]+)#([^)]+)\)(.*)")
@@ -166,10 +155,7 @@ let adjustLinks fileNameHandling state line =
             match Map.tryPick (fun n heading -> if sectionText n = sText then Some heading else None) state.toc with
             | Some _ ->
                 let post', state' = adjustLinks' state post  // recursive check for multiple links in a line
-                let adjustedLine =
-                    match fileNameHandling with
-                    | KeepFilename -> $"{pre}[§{sText}]({filename}#{kebabCase sText}-{anchor}){post'}"
-                    | DiscardFilename -> $"{pre}[§{sText}](#{kebabCase sText}-{anchor}){post'}"
+                let adjustedLine = $"{pre}[§{sText}]({filename}#{kebabCase sText}-{anchor}){post'}"
                 adjustedLine, state'
             | None ->
                 let msg = $"unknown link target {filename}#{anchor} ({sText})"
@@ -180,30 +166,16 @@ let adjustLinks fileNameHandling state line =
 
 let processSources chapters =
     // Add section numbers to the headers, collect the ToC information, and check for correct code fence info strings
-    let (processedChapters, state) = (initialState, chapters.clauses) ||> List.mapFold renumberClause
-    // Create the ToC and build the complete spec
-    let allLines =
-        List.concat [
-            chapters.frontMatter.lines
-            versionPlaceholder ()
-            tocHeader
-            tocLines state.toc
-            List.collect _.lines processedChapters
-        ]
+    let processedChapters, state = (initialState, chapters.clauses) ||> List.mapFold preprocessChapter
     // Adjust the reference links to point to the correct header of the new spec
-    let (allLines, _) =
-        ({state with chapterName = fullDocName; lineNumber = 0}, allLines)
-        ||> List.mapFold (adjustLinks DiscardFilename)
-    let fullDoc = {name = fullDocName; lines = allLines}
     let adjustChapterLinks chapter =
         let adjustedLines, _ =
-            ({state with chapterName = chapter.name; lineNumber = 0}, chapter.lines)
-            ||> List.mapFold (adjustLinks KeepFilename)
+            ({state with chapterName = chapter.name; lineNumber = 0}, chapter.lines) ||> List.mapFold adjustLinks
         {name = chapter.name; lines = adjustedLines}
     let frontMatterLines = chapters.frontMatter.lines @ versionPlaceholder()
     let adjustedChapters = processedChapters |> List.map adjustChapterLinks
     let outputChapters = {name = "index"; lines = frontMatterLines} :: adjustedChapters
-    if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok(fullDoc, outputChapters)
+    if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok outputChapters
 
 let build () =
     match readSources () |> Result.bind processSources |> Result.bind writeArtifacts with
