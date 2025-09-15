@@ -171,8 +171,6 @@ let adjustLinks state line =
 let processSources chapters =
     // Add section numbers to the headers, collect the ToC information, and check for correct code fence info strings
     let processedChapters, state = (initialState, chapters.clauses) ||> List.mapFold preprocessChapter
-    printfn $"{state.toc.Count} toc entries"
-    printfn $"{state.toc |> Map.toList |> List.head |> string}"
     // Adjust the reference links to point to the correct header of the new spec
     let adjustChapterLinks chapter =
         let adjustedLines, _ =
@@ -180,7 +178,7 @@ let processSources chapters =
         {name = chapter.name; lines = adjustedLines}
     let frontMatterLines = chapters.frontMatter.lines @ versionPlaceholder()
     let adjustedChapters = processedChapters |> List.map adjustChapterLinks
-    let outputChapters = {name = "index"; lines = frontMatterLines} :: adjustedChapters
+    let outputChapters = adjustedChapters // {name = "index"; lines = frontMatterLines} :: adjustedChapters
     if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok outputChapters
 
 let build () =
