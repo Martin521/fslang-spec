@@ -20,12 +20,12 @@ let mkdocsConfigSourcePath = Path.Join(assetsDir, "mkdocs.yml")
 let mkdocsIconSourcePath = Path.Join(assetsDir, "fsharp128.png")
 
 let versionPlaceholder () = [""; $"_This version was created from sources on {System.DateTime.Now}_"; ""]
-let tocHeader = [""; "# Table of Contents"]
+let chapterFileName chapterName = $"{chapterName}.md"
 
+type Catalog = {FrontMatter: string; RfcStatus: string; MainBody: string list}
 type Chapter = {name: string; lines: string list}
-type Sources = {frontMatter: Chapter; rfcStatus: Chapter; clauses: Chapter list}
-type Catalog = {FrontMatter: string; MainBody: string list; Annexes: string list}
-type FilenameHandling = KeepFilename | DiscardFilename
+type Sources = {frontMatter: Chapter; rfcStatus: Chapter; mainChapters: Chapter list}
+
 type BuildState = {
     chapterName: string
     lineNumber: int
@@ -34,6 +34,7 @@ type BuildState = {
     toc: Map<string * string, int list>
     errors: string list
 }
+
 type BuildError =
     | IoFailure of string
     | DocumentErrors of string list
@@ -47,8 +48,6 @@ let initialState = {
     errors = []
 }
 
-let chapterFileName chapterName = $"{chapterName}.md"
-
 let readSources () =
     try
         use catalogStream = File.OpenRead catalogPath
@@ -56,11 +55,11 @@ let readSources () =
         let getChapter name = {name = name; lines = File.ReadAllLines($"{sourceDir}/{name}.md") |> Array.toList}
         let clauses = catalog.MainBody |> List.map getChapter
         let frontMatter = getChapter catalog.FrontMatter
-        let rfcStatus = getChapter "rfc-status"
+        let rfcStatus = getChapter catalog.RfcStatus
         let totalChapters = clauses.Length + 1
         let totalLines = List.sumBy (_.lines >> List.length) clauses + frontMatter.lines.Length
         printfn $"read {totalChapters} files with a total of {totalLines} lines"
-        Ok {frontMatter = frontMatter; rfcStatus = rfcStatus; clauses = clauses}
+        Ok {frontMatter = frontMatter; rfcStatus = rfcStatus; mainChapters = clauses}
     with e ->
         Error(IoFailure e.Message)
 
@@ -169,17 +168,20 @@ let adjustLinks state line =
             lineFragment, state
     adjustLinks' state line
 
+let adjustChapterLinks state chapter =
+    let state = {state with chapterName = chapter.name; lineNumber = 0}
+    let adjustedLines, state = (state, chapter.lines) ||> List.mapFold adjustLinks
+    {chapter with lines = adjustedLines}, state
+
 let processSources chapters =
     // Add section numbers to the headers, collect the ToC information, and check for correct code fence info strings
-    let processedChapters, state = (initialState, chapters.clauses) ||> List.mapFold preprocessChapter
+    let processedChapters, state = (initialState, chapters.mainChapters) ||> List.mapFold preprocessChapter
+    
     // Adjust the reference links to point to the correct header of the new spec
-    let adjustChapterLinks chapter =
-        let adjustedLines, _ =
-            ({state with chapterName = chapter.name; lineNumber = 0}, chapter.lines) ||> List.mapFold adjustLinks
-        {name = chapter.name; lines = adjustedLines}
-    let frontMatterLines = chapters.frontMatter.lines @ versionPlaceholder()
-    let adjustedChapters = processedChapters |> List.map adjustChapterLinks
-    let outputChapters = {name = "index"; lines = frontMatterLines} :: chapters.rfcStatus :: adjustedChapters
+    let adjustedChapters, state = (state, processedChapters) ||> List.mapFold adjustChapterLinks
+
+    let frontMatterChapter = {name = "index"; lines = chapters.frontMatter.lines @ versionPlaceholder()}
+    let outputChapters = frontMatterChapter :: chapters.rfcStatus :: adjustedChapters
     if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok outputChapters
 
 let build () =
