@@ -178,7 +178,7 @@ let processSources chapters =
         {name = chapter.name; lines = adjustedLines}
     let frontMatterLines = chapters.frontMatter.lines @ versionPlaceholder()
     let adjustedChapters = processedChapters |> List.map adjustChapterLinks
-    let outputChapters = adjustedChapters // {name = "index"; lines = frontMatterLines} :: adjustedChapters
+    let outputChapters = {name = "index"; lines = frontMatterLines} :: adjustedChapters
     if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok outputChapters
 
 let build () =
