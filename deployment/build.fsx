@@ -31,7 +31,7 @@ type BuildState = {
     lineNumber: int
     sectionNumber: int list
     inCodeBlock: bool
-    toc: Map<int list, string>
+    toc: Map<string * string, int list>
     errors: string list
 }
 type BuildError =
@@ -46,6 +46,8 @@ let initialState = {
     toc = Map.empty
     errors = []
 }
+
+let chapterFileName chapterName = $"{chapterName}.md"
 
 let readSources () =
     try
@@ -71,7 +73,7 @@ let writeArtifacts chapters =
         File.Copy(mkdocsConfigSourcePath, mkdocsConfigFilePath)
         File.Copy(mkdocsIconSourcePath, mkdocsIconFilePath)
         for chapter in chapters do
-            let chapterPath = Path.Join(mkdocsDocsDir, $"{chapter.name}.md")
+            let chapterPath = Path.Join(mkdocsDocsDir, chapterFileName chapter.name)
             File.WriteAllLines(chapterPath, chapter.lines)
         printfn $"created {List.length chapters} chapters in {mkdocsDocsDir}"
         Ok()
@@ -138,7 +140,8 @@ let preprocessLine state line =
                 line, {state with errors = (mkError state msg) :: state.errors}
             else
                 let headerLine = $"{headerPrefix} {sectionText sectionNumber} {heading}"
-                headerLine, {state with sectionNumber = sectionNumber; toc = state.toc.Add(sectionNumber, heading)}
+                let toc = state.toc.Add((chapterFileName state.chapterName, kebabCase heading), sectionNumber)
+                headerLine, {state with sectionNumber = sectionNumber; toc = toc}
 
 let preprocessChapter state chapter =
     let state = {state with chapterName = chapter.name; lineNumber = 0}
@@ -148,17 +151,18 @@ let preprocessChapter state chapter =
 let adjustLinks state line =
     let state = {state with lineNumber = state.lineNumber + 1}
     let rec adjustLinks' state lineFragment =
-        let m = Regex.Match(lineFragment, "(.*)\[§(\d+\.[\.\d]*)\]\(([^#)]+)#([^)]+)\)(.*)")
+        let m = Regex.Match(lineFragment, "(.*)\[§[^]]*\]\(([^#)]+)#([^)]+)\)(.*)")
         if m.Success then
-            let pre, sText, filename, anchor, post =
-                m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value, m.Groups[4].Value, m.Groups[5].Value
-            match Map.tryPick (fun n heading -> if sectionText n = sText then Some heading else None) state.toc with
-            | Some _ ->
+            let pre, chapterFileName, anchor, post =
+                m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value, m.Groups[4].Value
+            match Map.tryPick (fun a s ->
+                if a = (chapterFileName, anchor) then Some (sectionText s) else None) state.toc with
+            | Some sText ->
                 let post', state' = adjustLinks' state post  // recursive check for multiple links in a line
-                let adjustedLine = $"{pre}[§{sText}]({filename}#{kebabCase sText}-{anchor}){post'}"
+                let adjustedLine = $"{pre}[§{sText}]({chapterFileName}#{sText}-{anchor}){post'}"
                 adjustedLine, state'
             | None ->
-                let msg = $"unknown link target {filename}#{anchor} ({sText})"
+                let msg = $"unknown link target {anchor}"
                 lineFragment, {state with errors = mkError state msg :: state.errors}
         else
             lineFragment, state
@@ -167,6 +171,8 @@ let adjustLinks state line =
 let processSources chapters =
     // Add section numbers to the headers, collect the ToC information, and check for correct code fence info strings
     let processedChapters, state = (initialState, chapters.clauses) ||> List.mapFold preprocessChapter
+    printfn $"{state.toc.Count} toc entries"
+    printfn $"{state.toc |> Map.toList |> List.head |> string}"
     // Adjust the reference links to point to the correct header of the new spec
     let adjustChapterLinks chapter =
         let adjustedLines, _ =
