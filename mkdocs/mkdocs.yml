@@ -26,5 +26,3 @@ theme:
   name: material
   highlightjs: true
   icon: 'fsharp128.png'
-  logo:
-    icon: 'fsharp128.png'
