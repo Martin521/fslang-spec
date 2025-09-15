@@ -159,8 +159,8 @@ let adjustLinks state line =
             match Map.tryPick (fun a s ->
                 if a = (chapterFileName, anchor) then Some (sectionText s) else None) state.toc with
             | Some sText ->
-                let post', state' = adjustLinks' state post  // recursive check for multiple links in a line
-                let adjustedLine = $"{pre}[§{sText}]({chapterFileName}#{kebabCase sText}-{anchor}){post'}"
+                let pre', state' = adjustLinks' state pre  // recursive check for multiple links in a line
+                let adjustedLine = $"{pre'}[§{sText}]({chapterFileName}#{kebabCase sText}-{anchor}){post}"
                 adjustedLine, state'
             | None ->
                 let msg = $"unknown link target {anchor}"
