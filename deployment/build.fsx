@@ -1,13 +1,12 @@
-// This script adds section headers and adjusts reference links.
-// It creates a single markdown doc (including ToC) of the spec and the necessary
-// input for mkdocs in the artifacts directory.
+// This script creates the input for mkdocs in the artifacts directory.
+// This includes copies of the markdown sources with added section headers and adjusted reference links.
 
 open System
 open System.Text.RegularExpressions
 open System.Text.Json
 open System.IO
 
-// Configuration of file locations and some document elements
+// Configuration of file locations
 let sourceDir = Path.Join("..", "spec")
 let catalogPath = Path.Join(sourceDir,"Catalog.json")
 let outDir = Path.Join("..", "artifacts")
@@ -176,13 +175,14 @@ let adjustChapterLinks state chapter =
 
 let processSources chapters =
     // Add section numbers to the headers, collect the ToC information, and check for correct code fence info strings
-    let processedChapters, state = (initialState, chapters.mainChapters) ||> List.mapFold preprocessChapter
+    let preProcessedChapters, state = (initialState, chapters.mainChapters) ||> List.mapFold preprocessChapter
     
     // Adjust the reference links to point to the correct header of the new spec
-    let adjustedChapters, state = (state, processedChapters) ||> List.mapFold adjustChapterLinks
+    let adjustedChapters, state = (state, preProcessedChapters) ||> List.mapFold adjustChapterLinks
 
     let frontMatterChapter = {name = "index"; lines = chapters.frontMatter.lines @ versionPlaceholder()}
     let outputChapters = frontMatterChapter :: chapters.rfcStatus :: adjustedChapters
+    
     if not state.errors.IsEmpty then Error(DocumentErrors(List.rev state.errors)) else Ok outputChapters
 
 let build () =
