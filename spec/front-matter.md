@@ -4,7 +4,7 @@ This documentation is work-in-progress, aiming at a F# 10 specification.
 
 Historically, a F# spec was maintained as a Word document until about 2018, when some of the then new F# 4.1 features were added. Since then, changes to the language were documented in RFC documents in the [language design repo](https://github.com/fsharp/fslang-design/).
 
-This site is the output of an ongoing effort to make the spec complete and to make it more accessible and community-maintainable. The [F# 4.1 spec](https://fsharp.org/specs/language-spec/4.1/FSharpSpec-4.1-latest.pdf) was converted to markdown and cleaned. The RFCs are now one by one added. Their status is listed [here](rfc-status.md). Check the [source repo](https://github.com/fsharp/fslang-spec/) for ways to contribute.
+This site is the output of an ongoing effort to make the spec complete and to make it more accessible and community-maintainable. The starting point was the [F# 4.1 spec](https://fsharp.org/specs/language-spec/4.1/FSharpSpec-4.1-latest.pdf) that was converted to markdown and cleaned. The RFCs are now one by one added. Their status is listed [here](rfc-status.md). Check the [source repo](https://github.com/fsharp/fslang-spec/) for ways to contribute.
 
 
 ## Notices
