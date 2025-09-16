@@ -6,7 +6,7 @@ This is an initiative to create a more complete and community-maintainable F# sp
 
 You can view the current version of the spec [here](https://fsharp.github.io/fslang-spec/) and the list of open and completed RFCs [here](https://fsharp.github.io/fslang-spec/rfc-status/).
 
-The maintained source of the spec is a collection of markdown files in the `spec` folder of this repo.
+The maintained source of the spec is a collection of markdown files (one per chapter) in the `spec` folder of this repo.
 
 ## Contributing
 
