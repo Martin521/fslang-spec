@@ -10,7 +10,7 @@ assemblies that are authored in other CLI languages.
 
 | Attribute | Description |
 | --- | --- |
-| System.ObsoleteAttribute <br> [\<Obsolete(...)>] | Indicates that the construct is obsolete and gives a warning or error depending on the settings in the attribute. <br>This attribute may be used in both F# and imported assemblies. |
+| System.ObsoleteAttribute <br> [\<Obsolete(...)\>] | Indicates that the construct is obsolete and gives a warning or error depending on the settings in the attribute. <br>This attribute may be used in both F# and imported assemblies. |
 | System.ParamArrayAttribute <br> [\<ParamArray(...)>] | When applied to an argument of a method, indicates that the method can accept a variable number of arguments. <br>This attribute may be used in both F# and imported assemblies. |
 | System.ThreadStaticAttribute <br> [\<ThreadStatic(...)>] | Marks a mutable static value in a class as thread static. <br>This attribute may be used in both F# and imported assemblies. |
 | System.ContextStaticAttribute <br> [\<ContextStatic(...)>] | Marks a mutable static value in a class as context static. <br>This attribute may be used in both F# and imported assemblies. |
