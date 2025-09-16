@@ -34,5 +34,5 @@ jobs:
         run: cd deployment && dotnet fsi build.fsx
 
       - name: Create web site and deploy to GitHub pages
-        run: artifacts/mkdocs && mkdocs gh-deploy --force
+        run: cd artifacts/mkdocs && mkdocs gh-deploy --force
 
