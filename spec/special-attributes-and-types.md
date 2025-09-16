@@ -2,7 +2,7 @@
 
 This chapter describes attributes and types that have special significance to the F# compiler.
 
-## Custom Attributes Recognized by F#
+## Custom Attributes Recognized by F# ##
 
 The following custom attributes have special meanings recognized by the F# compiler. Except where
 indicated, the attributes may be used in F# code, in referenced assemblies authored in F#, or in
