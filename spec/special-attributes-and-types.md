@@ -2,7 +2,7 @@
 
 This chapter describes attributes and types that have special significance to the F# compiler.
 
-## Custom Attributes Recognized by F# ##
+## Custom Attributes Recognized by F#.
 
 The following custom attributes have special meanings recognized by the F# compiler. Except where
 indicated, the attributes may be used in F# code, in referenced assemblies authored in F#, or in
@@ -64,7 +64,7 @@ assemblies that are authored in other CLI languages.
 | FSharp.Core.TypeProviderXmlDocAttribute | Specifies documentation for provided type definitions and provided members |
 | FSharp.Core.TypeProviderDefinitionLocationAttribute | Specifies location information for provided type definitions and provided members |
 
-## Custom Attributes Emitted by F#
+## Custom Attributes Emitted by F#.
 
 The F# compiler can emit the following custom attributes:
 
@@ -81,7 +81,7 @@ The F# compiler can emit the following custom attributes:
 | FSharp.Core.FSharpInterfaceDataVersionAttribute | Defines the schema number for the embedded binary resource for F#-specific interface and optimization data. |
 | FSharp.Core.OptionalArgumentAttribute | Indicates optional arguments to F# members. |
 
-## Custom Attributes not Recognized by F#
+## Custom Attributes not Recognized by F#.
 
 The following custom attributes are defined in some CLI implementations and may appear to be
 relevant to F#. However, they either do not affect the behavior of the F# compiler, or result in an
