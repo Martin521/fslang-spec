@@ -15,8 +15,7 @@
             "extensions": [
                 "ms-dotnettools.vscode-dotnet-runtime",
                 "Ionide.Ionide-fsharp",
-                "tintoy.msbuild-project-tools",
-                "mhutchie.git-graph"
+                "tintoy.msbuild-project-tools"
             ]
         }
     }

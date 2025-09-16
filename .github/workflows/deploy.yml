@@ -27,9 +27,12 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install mkdocs
         run: pip install mkdocs-material
 
-      - name: Deploy to GitHub Pages
-        run: cd deployment && dotnet fsi build.fsx && cd ../artifacts/mkdocs && mkdocs gh-deploy --force
+      - name: Create heading numbers, update links, prepare mkdocs input
+        run: cd deployment && dotnet fsi build.fsx
+
+      - name: Create web site and deploy to GitHub pages
+        run: artifacts/mkdocs && mkdocs gh-deploy --force
 
