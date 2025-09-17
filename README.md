@@ -15,6 +15,7 @@ Integration of the remaining RFCs is no small task, but we believe it is worthwh
 - If you feel you can turn one of the open RFCs into spec language, please create a PR with the corresponding changes to the respective chapter(s). We recommend you open an issue first, indicating you want to tackle that PR, to avoid double work.
 - If you find typos or other small mistakes in the spec, please open an issue and preferably also a corresponding PR.
 
+For more details, see [this](CONTRIBUTING.md) guide.
 
 ## Review Process
 
