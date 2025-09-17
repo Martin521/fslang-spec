@@ -4,7 +4,7 @@
 
 This is an initiative to create a more complete and community-maintainable F# specification.
 
-You can view the current version of the spec [here](https://fsharp.github.io/fslang-spec/) and the list of open and completed RFCs [here](https://fsharp.github.io/fslang-spec/rfc-status/).
+You can view the current version of the specification [here](https://fsharp.github.io/fslang-spec/introduction/).
 
 The maintained source of the spec is a collection of markdown files (one per chapter) in the `spec` folder of this repo.
 
@@ -12,7 +12,10 @@ The maintained source of the spec is a collection of markdown files (one per cha
 
 Integration of the remaining RFCs is no small task, but we believe it is worthwhile and we count on community contributions.
 
-- If you feel you can turn one of the open RFCs into spec language, please create a PR with the corresponding changes to the respective chapter(s). We recommend you open an issue first, indicating you want to tackle that PR, to avoid double work.
+- If you feel you can turn one of the open RFCs into spec language, please create a PR with the corresponding changes to the respective chapter(s). We recommend you open an issue first, indicating you want to tackle that PR, to avoid double work. 
+
+  You can find the list of open and completed RFCs [here](https://fsharp.github.io/fslang-spec/rfc-status/).
+
 - If you find typos or other small mistakes in the spec, please open an issue and preferably also a corresponding PR.
 
 For more details, see [this](CONTRIBUTING.md) guide.

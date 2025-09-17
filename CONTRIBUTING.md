@@ -6,11 +6,27 @@ Writing a good spec is an art in itself. You must be very precise while using na
 
 ## Guidelines for editing the markdown sources
 
-The source for the spec are the markdown files in the spec folder.
+The source for the spec is the collection of markdown files in the spec folder.
 
-### Markdown flavor
+#### Markdown flavor
 
 We aim to use [CommonMark](https://spec.commonmark.org/0.31.2/) markdown, plus the [section links](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#section-links) and [tables](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-tables#creating-a-table) of github-flavored markdown.
+
+#### Headings
+
+We use [ATX headings](https://spec.commonmark.org/0.31.2/#atx-headings) without closing # characters.
+
+In the sources, the headings are not numbered. Numbering is added during the build process.
+
+#### Links
+
+Intra-spec links are made like this: `[§](inference-procedures.md#constraint-solving)`.
+
+As such, the links work directly in the spec sources (like on github or in VS Code preview).
+
+They are converted during the build process to include the section number.
+
+#### Other markdown guidelines
 
 All [fenced code blocks](https://spec.commonmark.org/0.31.2/#fenced-code-blocks) should carry one of the following info strings.
 
@@ -22,22 +38,6 @@ All [fenced code blocks](https://spec.commonmark.org/0.31.2/#fenced-code-blocks)
 Show _defined terms_ in italics.
 
 For `inline code` (including e.g. file and type names) use code spans.
-
-### Headings
-
-We use [ATX headings](https://spec.commonmark.org/0.31.2/#atx-headings) with opening ticks only.
-
-In the sources, the headings are not numbered. Numbering is added during the build process.
-
-When adding to the spec, avoid adding sections. If you need to add a section, do so at the end of the current section hierarchy level, so that no existing sections are renumbered.
-
-### Links
-
-Intra-spec links are made like this: `[§](inference-procedures.md#constraint-solving)`.
-
-As such, the links work directly in the spec sources (like on github or in VS Code preview).
-
-They are converted during the build process to include the section number.
 
 ## Viewing the result
 
